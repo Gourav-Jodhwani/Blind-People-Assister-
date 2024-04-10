@@ -6,7 +6,7 @@ import time
 import os
 import pyttsx3
 
-# engine = pyttsx3.init()
+engine = pyttsx3.init()
 
 def show_image(img):
     cv.imshow("Image", img)
@@ -16,6 +16,9 @@ def draw_labels_and_boxes(img, boxes, confidences, classids, idxs, colors, label
     # If there are any detections
     cv.line(img, (640//3, 0), (640//3, 480), (0,0,0), 2)
     cv.line(img, ((640*2)//3, 0), ((640*2)//3, 480), (0,0,0), 2)
+    cv.line(img, (0,480//3), (640,480//3), (0,0,0), 2)
+    cv.line(img, (0,(480*2)//3), (640,(480*2)//3), (0,0,0), 2)
+    
     if len(idxs) > 0:
         for i in idxs.flatten():
             # Get the bounding box coordinates
@@ -29,29 +32,48 @@ def draw_labels_and_boxes(img, boxes, confidences, classids, idxs, colors, label
             # Draw the bounding box rectangle and label on the image
             cv.rectangle(img, (x, y), (x+w, y+h), color, 2)
 
-            text = "{}: {:4f}".format(labels[classids[i]], confidences[i])
+            text_horiz = "{}: {:4f}".format(labels[classids[i]], confidences[i])
+            text_vert = "{}: {:4f}".format(labels[classids[i]], confidences[i])
+
 
             topLeft,topRight=x,x+w
+            vert_top,vert_bottom=y,y+h
             left=640//3
             right=(640*2)//3
+            top=480//3
+            bottom=(480*2)//3
+
             if( topLeft<left and topRight<=left):
-                text="Left"
+                text_horiz="Left"
             if(topLeft>=left and topRight<=right):
-                text="Middle"
+                text_horiz="Middle"
             if(topLeft>=right and topRight>=right):
-                text="Right"
+                text_horiz="Right"
             if(topLeft<left and topRight>left and topRight<=right):
-                text="Left+Middle"
+                text_horiz="Left and Middle"
             if(topLeft>=left and topLeft<right and topRight>=right):
-                text="Middle+right"
+                text_horiz="Middle and right"
             if( topLeft<=left and topRight>=right):
-                text="Left+Middle+Right"
+                text_horiz="Left and Middle and Right"
+
+            if( vert_top<top and vert_bottom<=top):
+                text_vert="Top"
+            if(vert_top>=top and vert_bottom<=bottom):
+                text_vert="Middle"
+            if(vert_top>=bottom and vert_bottom>=bottom):
+                text_vert="Bottom"
+            if(vert_top<top and vert_bottom>top and vert_bottom<=bottom):
+                text_vert="Top and Middle"
+            if(vert_top>=top and vert_top<bottom and vert_bottom>=bottom):
+                text_vert="Middle and Bottom"
+            if( vert_top<=top and vert_bottom>=bottom):
+                text_vert="Top and Middle and Bottom"
             
 
-            # engine.say(labels[classids[i]]+" "+text)
-            # engine.runAndWait()
+            engine.say(labels[classids[i]]+" "+text_vert+" "+text_horiz)
+            engine.runAndWait()
 
-            cv.putText(img, labels[classids[i]]+" "+text, (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv.putText(img, labels[classids[i]]+" "+text_vert+" "+text_horiz, (x, y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
     return img
 
